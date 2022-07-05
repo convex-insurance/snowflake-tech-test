@@ -34,8 +34,8 @@ override.tf.json
 terraform.rc
 
 # Generated data
-**/.input_data/*
 /.venv/
 /infra/dev/.terraform/
 /infra/dev/.terraform.lock.hcl
 /.idea
+/input_data/

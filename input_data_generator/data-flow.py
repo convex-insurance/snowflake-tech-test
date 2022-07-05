@@ -2,6 +2,8 @@ from prefect import Flow, task, Parameter
 from prefect.client import Secret
 from prefect.tasks.snowflake import SnowflakeQuery
 
+from main_data_generator import generate_sample_data, exportDataToS3
+
 # set Secret parameters in ~/.prefect/config.toml, refer to
 snowflake_query = SnowflakeQuery(
     account=Secret("SNOWFLAKE_ACCOUNT").get(),
@@ -58,10 +60,16 @@ insert_customer_transactions_data_query = """
                 table(flatten(t."v":basket)) flatten_basket;
             """
 
+@task
+def generate_and_upload_sample_data():
+    generate_sample_data()
+    exportDataToS3()
+
 with Flow("load-data-flow") as flow:
-    snowflake_query(query=insert_customers_data_query)
-    snowflake_query(query=insert_products_data_query)
-    insert_transactions_data_result = snowflake_query(query=insert_transactions_data_query)
+    generate_and_upload_sample_data_result = generate_and_upload_sample_data()
+    snowflake_query(query=insert_customers_data_query, upstream_tasks=[generate_and_upload_sample_data_result])
+    snowflake_query(query=insert_products_data_query, upstream_tasks=[generate_and_upload_sample_data_result])
+    insert_transactions_data_result = snowflake_query(query=insert_transactions_data_query, upstream_tasks=[generate_and_upload_sample_data_result])
     snowflake_query(query=insert_customer_transactions_data_query, upstream_tasks=[insert_transactions_data_result])
 
 flow.run()

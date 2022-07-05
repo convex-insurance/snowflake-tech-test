@@ -121,7 +121,6 @@ def generate_sample_data():
         start_date,
         end_date,
     )
-    exportDataToS3()
 
 
 def exportDataToS3():
@@ -147,5 +146,3 @@ def exportDataToS3():
     except Exception as err:
         print(err)
 
-
-generate_sample_data()

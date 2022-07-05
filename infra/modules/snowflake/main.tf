@@ -148,16 +148,27 @@ locals {
   role_name = "snowflake_access_role"
   policy_name = "snowflake_access_policy"
   role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.role_name}"
+  bucket_name = "convexbucket"
+}
+
+
+resource "aws_s3_bucket" "convex_bucket" {
+  bucket = local.bucket_name
+}
+
+resource "aws_s3_bucket_acl" "convex_bucket_acl" {
+  bucket = aws_s3_bucket.convex_bucket.id
+  acl    = "private"
 }
 
 resource snowflake_storage_integration S3_INTEGRATION {
-  depends_on = [snowflake_database.CONVEX_TEST]
+  depends_on = [snowflake_database.CONVEX_TEST, aws_s3_bucket.convex_bucket]
   name    = "S3_INTEGRATION"
   type    = "EXTERNAL_STAGE"
 
   enabled = true
 
-  storage_allowed_locations = ["s3://convexbucket/"]
+  storage_allowed_locations = ["s3://${local.bucket_name}/"]
 
   storage_provider         = "S3"
   storage_aws_role_arn = local.role_arn
@@ -166,7 +177,7 @@ resource snowflake_storage_integration S3_INTEGRATION {
 resource "snowflake_stage" "S3_STAGE_CSV" {
   depends_on = [snowflake_storage_integration.S3_INTEGRATION, snowflake_file_format.csv_format]
   name        = "S3_STAGE_CSV"
-  url         = "s3://convexbucket/"
+  url         = "s3://${local.bucket_name}/"
   database    = "CONVEX_TEST"
   schema      = "PUBLIC"
   storage_integration = "S3_INTEGRATION"
@@ -176,7 +187,7 @@ resource "snowflake_stage" "S3_STAGE_CSV" {
 resource "snowflake_stage" "S3_STAGE_JSON" {
   depends_on = [snowflake_storage_integration.S3_INTEGRATION, snowflake_file_format.json_format]
   name        = "S3_STAGE_JSON"
-  url         = "s3://convexbucket/"
+  url         = "s3://${local.bucket_name}/"
   database    = "CONVEX_TEST"
   schema      = "PUBLIC"
   storage_integration = "S3_INTEGRATION"
