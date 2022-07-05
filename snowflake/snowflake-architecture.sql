@@ -18,7 +18,7 @@ CREATE OR REPLACE TABLE CUSTOMER_TRANSACTIONS(
     product_id string,
     price number,
     date_of_purchase timestamp
-)
+);
 
 CREATE OR REPLACE STORAGE INTEGRATION S3_integration
 TYPE = EXTERNAL_STAGE
@@ -54,4 +54,3 @@ FROM CONVEX_TEST.PUBLIC.CUSTOMER_TRANSACTIONS ct
 JOIN CONVEX_TEST.PUBLIC.CUSTOMERS c ON c."customer_id" = ct."customer_id"
 JOIN CONVEX_TEST.PUBLIC.PRODUCTS p ON p."product_id" = ct."product_id"
 GROUP BY c."customer_id", c."loyalty_score", p."product_id", p."product_category";
-

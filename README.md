@@ -74,6 +74,9 @@ Please save Snowflake model code in `snowflake` and infrastructure code in `infr
 
 Update this README as code evolves.
 
+#### Terraform
+To install terraform refer to: https://learn.hashicorp.com/tutorials/terraform/install-cli
+
 #### Environmental variables
 To run terraform and upload files to s3 set the following environmental variables:
 - SNOWFLAKE_USER

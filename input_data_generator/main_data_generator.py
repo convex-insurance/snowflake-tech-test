@@ -149,4 +149,3 @@ def exportDataToS3():
 
 
 generate_sample_data()
-
