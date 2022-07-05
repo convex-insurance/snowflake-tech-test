@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import boto3
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -10,7 +11,8 @@ from data_generator import (
     generate_transactions,
 )
 
-if __name__ == "__main__":
+
+def generate_sample_data():
     np.random.seed(seed=42)
 
     products_data = {
@@ -84,14 +86,19 @@ if __name__ == "__main__":
             "chicken stock",
             "water",
         ],
+        "bws": [  # TODO bws category was missing
+            "beer",
+            "wine",
+            "spirits",
+        ],
     }
     products_cats_frequency = (
-        ["house"] * 15
-        + ["clothes"] * 5
-        + ["fruit_veg"] * 25
-        + ["sweets"] * 20
-        + ["food"] * 25
-        + ["bws"] * 10
+            ["house"] * 15
+            + ["clothes"] * 5
+            + ["fruit_veg"] * 25
+            + ["sweets"] * 20
+            + ["food"] * 25
+            + ["bws"] * 10
     )
 
     gen_id = "starter"
@@ -114,3 +121,32 @@ if __name__ == "__main__":
         start_date,
         end_date,
     )
+    exportDataToS3()
+
+
+def exportDataToS3():
+    s3 = boto3.resource(
+        service_name='s3',
+        region_name=os.environ["AWS_REGION"],
+        aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"]
+    )
+
+    try:
+        bucket_name = "convexbucket"
+        root_path = 'input_data/starter'
+
+        bucket = s3.Bucket(bucket_name)
+
+        for path, subdirs, files in os.walk(root_path):
+            path = path.replace("\\", "/")
+            directory_name = path.replace(root_path, "")
+            for file in files:
+                bucket.upload_file(os.path.join(path, file), directory_name + '/' + file)
+
+    except Exception as err:
+        print(err)
+
+
+generate_sample_data()
+
