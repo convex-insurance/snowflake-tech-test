@@ -73,3 +73,70 @@ This should produce customers, products and transaction data under `./input_data
 Please save Snowflake model code in `snowflake` and infrastructure code in `infra` folder.
 
 Update this README as code evolves.
+
+#### Terraform
+To install terraform refer to: https://learn.hashicorp.com/tutorials/terraform/install-cli
+
+#### Environmental variables
+To run terraform and upload files to s3 set the following environmental variables:
+- SNOWFLAKE_USER
+- SNOWFLAKE_PRIVATE_KEY_PATH
+- SNOWFLAKE_ACCOUNT
+- SNOWFLAKE_REGION
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- AWS_REGION
+
+Instructions for setting Snowflake variables can be found here: https://quickstarts.snowflake.com/guide/terraforming_snowflake/index.html#0
+
+#### Prefect config file
+
+To successfully run data pipeline, create the following file:
+
+```bash
+touch ~/.prefect/config.toml
+```
+
+The structure of the mentioned file should look like this:
+
+```
+[context.secrets]
+SNOWFLAKE_ACCOUNT="<YOUR-ACCOUNT-ID>.<YOUR-REGION-ID>"
+SNOWFLAKE_USER="<YOUR-USERNAME>"
+SNOWFLAKE_PASSWORD="<YOUR-PASSWORD>"
+```
+
+#### Run
+
+To run terraform file navigate to:
+
+```bash
+cd ./infra/dev/
+```
+
+and run following commands:
+
+```bash
+terraform init
+terraform apply
+```
+
+If you want to revert changes made by terraform run:
+
+```bash
+terraform destroy
+```
+
+To generate and export sample files use:
+
+```bash
+python ./input_data_generator/main_data_generator.py
+```
+
+To start the data load pipeline use:
+
+```bash
+python ./input_data_generator/data-flow.py
+```
+
+After data load pipeline finishes, tables in Snowflake should contain generated sample data.
